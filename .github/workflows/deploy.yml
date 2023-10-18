@@ -34,9 +34,3 @@ jobs:
           version_label: ${{ github.run_id }}
           region: sa-east-1
           deployment_package: ./site.zip
-
-      - name: Install dotnet ef tool
-        run: dotnet tool install --global dotnet-ef -version 6.0.11 
-      
-      - name: Update database
-        run: cd ./Infra; dotnet ef database update --startup-project ../Api/Api.csproj
