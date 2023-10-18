@@ -1,0 +1,27 @@
+version: '3.4'
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server
+    restart: always
+    container_name: db
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "rafa1204."
+      MSSQL_PID: "Express"   
+      MSSQL_AGENT_ENABLED: "true"
+      MSSQL_TCP_PORT: "1433"
+    volumes:
+      - ./Schema/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports: 
+      - '1433:1433' 
+  api:
+    image: ${DOCKER_REGISTRY-}api
+    container_name: api
+    build:
+      context: .
+      dockerfile: Api/Dockerfile
+    ports:
+      - '8090:80'
+    depends_on: 
+      - db

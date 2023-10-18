@@ -1,0 +1,42 @@
+
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:     
+      - name: Git setup
+        uses: actions/checkout@v2
+      
+      - name: Dotnet run
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0'
+      
+      - name: Publish prod
+        run: cd ./Api; dotnet restore; dotnet publish -r linux-x64 --configuration "Release" --self-contained "true" -o ../site; cd .. ;
+
+      - name: Generate deployment package 
+        run: zip -j ./site.zip ./site/*;
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v16
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: deploy-rafa
+          environment_name: Deploy-rafa-env
+          version_label: ${{ github.run_id }}
+          region: sa-east-1
+          deployment_package: ./site.zip
+
+      - name: Install dotnet ef tool
+        run: dotnet tool install --global dotnet-ef -version 6.0.11 
+      
+      - name: Update database
+        run: cd ./Infra; dotnet ef database update --startup-project ../Api/Api.csproj

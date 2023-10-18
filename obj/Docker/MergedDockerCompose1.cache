@@ -1,0 +1,52 @@
+name: dockercompose1216425740203473772
+services:
+  api:
+    build:
+      context: C:\Users\Rafael Evangelista\Documents\Projetos\Products
+      dockerfile: Api/Dockerfile
+    container_name: api
+    depends_on:
+      db:
+        condition: service_started
+        required: true
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    image: api
+    networks:
+      rafalovin: null
+    ports:
+      - mode: ingress
+        target: 80
+        protocol: tcp
+      - mode: ingress
+        target: 80
+        published: "8090"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: C:\Users\Rafael Evangelista\AppData\Roaming/Microsoft/UserSecrets
+        target: /root/.microsoft/usersecrets
+        read_only: true
+        bind:
+          create_host_path: true
+  db:
+    container_name: db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_AGENT_ENABLED: "true"
+      MSSQL_PID: Express
+      MSSQL_TCP_PORT: "1433"
+      SA_PASSWORD: rafa1204.
+    image: mcr.microsoft.com/mssql/server
+    networks:
+      rafalovin: null
+    ports:
+      - mode: ingress
+        target: 1433
+        published: "1433"
+        protocol: tcp
+    restart: always
+networks:
+  rafalovin:
+    name: dockercompose1216425740203473772_rafalovin
+    driver: bridge
